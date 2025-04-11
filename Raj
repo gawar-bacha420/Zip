@@ -1,0 +1,23 @@
+from FBTools import Start
+
+def Login():
+    cok = input('Input Your Cookie : ')
+    FB = Start(cookie=cok)  # Single Cookie
+    if FB.IsValid:
+        BotInbox(FB)
+    else:
+        exit('Cookie Invalid')
+
+def BotInbox(FB):
+    uid = input('Input Facebook UID : ')
+    msg = input('Write Message : ')
+    loop = int(input('How Many Times : '))
+    for i in range(loop):
+        try:
+            sent = FB.SendMessageToInbox(uid=uid, message=msg)
+            print(f'Message Sent [{i+1}]: {sent}')
+        except Exception as e:
+            print(f'Failed to send message: {e}')
+
+if __name__ == '__main__':
+    Login()
