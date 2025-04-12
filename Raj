@@ -1,23 +1,34 @@
-from FBTools import Start
+/* Clean Facebook Auto Messenger Chrome Extension with User Targeting */
 
-def Login():
-    cok = input('Input Your Cookie : ')
-    FB = Start(cookie=cok)  # Single Cookie
-    if FB.IsValid:
-        BotInbox(FB)
-    else:
-        exit('Cookie Invalid')
+// popup.html
 
-def BotInbox(FB):
-    uid = input('Input Facebook UID : ')
-    msg = input('Write Message : ')
-    loop = int(input('How Many Times : '))
-    for i in range(loop):
-        try:
-            sent = FB.SendMessageToInbox(uid=uid, message=msg)
-            print(f'Message Sent [{i+1}]: {sent}')
-        except Exception as e:
-            print(f'Failed to send message: {e}')
+<!DOCTYPE html><html>
+  <head>
+    <title>Auto Messenger</title>
+    <style>
+      body { font-family: sans-serif; padding: 20px; }
+      textarea, input { width: 100%; margin-bottom: 10px; }
+    </style>
+  </head>
+  <body>
+    <h2>Auto Messenger</h2>
+    <input id="user" placeholder="Facebook UID or profile link" />
+    <textarea id="message" rows="4" placeholder="Enter message..."></textarea>
+    <input type="number" id="delay" placeholder="Delay (ms)" />
+    <button id="start">Start Messaging</button>
+    <script src="popup.js"></script>
+  </body>
+</html>// popup.js document.getElementById('start').addEventListener('click', () => { const uidInput = document.getElementById('user').value.trim(); const message = document.getElementById('message').value; const delay = parseInt(document.getElementById('delay').value); if (!uidInput || !message || !delay) return alert('Fill all fields');
 
-if __name__ == '__main__':
-    Login()
+let uid = uidInput; if (uid.includes('facebook.com')) { const match = uid.match(/facebook.com/(?:profile.php?id=)?([0-9A-Za-z.]+)/); if (match) uid = match[1]; }
+
+const msgUrl = https://www.facebook.com/messages/t/${uid};
+
+chrome.tabs.create({ url: msgUrl }, (tab) => { setTimeout(() => { chrome.scripting.executeScript({ target: { tabId: tab.id }, func: autoMessage, args: [message, delay] }); }, 5000); }); });
+
+function autoMessage(msg, delay) { const interval = setInterval(() => { const textbox = document.querySelector('[contenteditable="true"]'); if (textbox) { textbox.innerText = msg; textbox.dispatchEvent(new InputEvent('input', { bubbles: true })); document.querySelector('[aria-label="Press Enter to send"]')?.click(); } }, delay); }
+
+// manifest.json { "manifest_version": 3, "name": "Auto Messenger", "version": "1.1", "permissions": ["scripting", "tabs", "activeTab"], "action": { "default_popup": "popup.html" }, "background": { "service_worker": "background.js" }, "host_permissions": [ "https://www.facebook.com/*" ] }
+
+// background.js console.log("Auto Messenger Extension Loaded");
+
